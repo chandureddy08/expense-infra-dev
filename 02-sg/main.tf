@@ -1,5 +1,5 @@
 module "db" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for Database instances"
@@ -8,7 +8,7 @@ module "db" {
     sg_name = "db"
 }
 module "backend" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for Backend instances"
@@ -17,7 +17,7 @@ module "backend" {
     sg_name = "backend"
 }
 module "frontend" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for Frontend instances"
@@ -27,7 +27,7 @@ module "frontend" {
 }
 #app_alb
 module "web_alb" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for WEB ALB instances"
@@ -36,7 +36,7 @@ module "web_alb" {
     sg_name = "web_alb"
 }
 module "bastion" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for bastion instances"
@@ -46,7 +46,7 @@ module "bastion" {
 }
 #app_alb
 module "app_alb" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for APP ALB instances"
@@ -56,7 +56,7 @@ module "app_alb" {
 }
 
 module "vpn" {
-    source = "../../terraform-aws-securitygroup"
+    source = "../terraform-aws-securitygroup"
     project_name = var.project_name
     environment = var.environment
     sg_description = "SG for VPN instances"
@@ -213,11 +213,32 @@ resource "aws_security_group_rule" "bastion_public" {
   security_group_id = module.bastion.sg_id
 }
 
-resource "aws_security_group_rule" "frontend_public" {
+# added as a part of jeenkins cicd
+resource "aws_security_group_rule" "backend_default_vpc" {
   type              = "ingress"
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks = ["172.31.0.0/16"]
+  security_group_id = module.backend.sg_id
+}
+
+# added as a part of jeenkins cicd
+resource "aws_security_group_rule" "frontend_default_vpc" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks = ["172.31.0.0/16"]
   security_group_id = module.frontend.sg_id
 }
+
+# not required we can connect from vpn
+# resource "aws_security_group_rule" "frontend_public" {
+#   type              = "ingress"
+#   from_port         = 22
+#   to_port           = 22
+#   protocol          = "tcp"
+#   cidr_blocks = ["0.0.0.0/0"]
+#   security_group_id = module.frontend.sg_id
+# }
